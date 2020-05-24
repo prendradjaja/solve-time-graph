@@ -23,11 +23,11 @@ const DAY_MS = 1000 * 60 * 60 * 24;
  * d1 - d2
  */
 function dateDifference(d1, d2) {
-  return (d1.valueOf() - d2.valueOf());
+  return d1.valueOf() - d2.valueOf();
 }
 
 function addMilliseconds(d, ms) {
-  return new Date(d.valueOf() + ms)
+  return new Date(d.valueOf() + ms);
 }
 
 // Adapted from https://observablehq.com/@d3/line-with-missing-data
@@ -48,8 +48,8 @@ export class GraphComponent implements OnInit {
   constructor(private elementRef: ElementRef) {}
 
   ngOnInit(): void {
-    this.data = parseExampleData(aapl)
-    this.data = ((() => {
+    this.data = parseExampleData(aapl);
+    this.data = (() => {
       let previous;
       const result = [];
       for (const point of this.data) {
@@ -58,16 +58,16 @@ export class GraphComponent implements OnInit {
           if (xChange > 35 * DAY_MS) {
             result.push({
               date: addMilliseconds(point.date, -1 * DAY_MS),
-              value: undefined
+              value: undefined,
             });
           }
         }
-        result.push(point)
+        result.push(point);
         previous = point;
       }
       return result;
-    })())
-    console.log(this.data)
+    })();
+    console.log(this.data);
 
     this.xScale = d3
       .scaleUtc()

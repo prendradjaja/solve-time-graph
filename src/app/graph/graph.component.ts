@@ -9,7 +9,7 @@ export interface Point {
 }
 
 export interface GraphOptions {
-  type?: 'line' | 'dots'; // default line
+  seriesType?: 'line' | 'dots'; // default line
   lineOptions?: {
     showGaps?: boolean; // default true
     gapDistance?: number; // default 2 days?
@@ -100,12 +100,12 @@ export class GraphComponent implements OnChanges {
           .call(d3.axisLeft(this.yScale))
       );
 
-    if (this.options.type === 'line') {
+    if (this.options.seriesType === 'line') {
       this.drawLineSeries();
-    } else if (this.options.type === 'dots') {
+    } else if (this.options.seriesType === 'dots') {
       this.drawDotsSeries();
     } else {
-      throw new UnreachableCaseError(this.options.type);
+      throw new UnreachableCaseError(this.options.seriesType);
     }
 
     const element = this.elementRef.nativeElement as HTMLElement;
@@ -168,7 +168,7 @@ export class GraphComponent implements OnChanges {
 
   private getOptions(options: GraphOptions): GraphOptions {
     const defaultOptions: DeepRequired<GraphOptions> = {
-      type: 'line',
+      seriesType: 'line',
       lineOptions: {
         showGaps: true,
         gapDistance: 2,

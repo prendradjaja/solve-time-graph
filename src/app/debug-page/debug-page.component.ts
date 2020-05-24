@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { aapl } from '../aapl';
-import { XYPair } from '../graph/graph.component';
+import { Point } from '../graph/graph.component';
 
-function parseExampleData(dataString: string): XYPair[] {
+function parseExampleData(dataString: string): Point[] {
   return dataString
     .trim()
     .split('\n')
@@ -18,7 +18,7 @@ function parseExampleData(dataString: string): XYPair[] {
   styleUrls: ['./debug-page.component.scss'],
 })
 export class DebugPageComponent implements OnInit {
-  exampleData: XYPair[];
+  exampleData: Point[];
 
   constructor() {}
 

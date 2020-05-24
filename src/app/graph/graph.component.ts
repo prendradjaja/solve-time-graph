@@ -1,7 +1,7 @@
 import { Component, ElementRef, OnInit, Input, OnChanges } from '@angular/core';
 import * as d3 from 'd3';
 
-export interface XYPair {
+export interface Point {
   x: Date;
   y: number;
 }
@@ -28,7 +28,7 @@ function addMilliseconds(d, ms) {
 })
 export class GraphComponent implements OnChanges {
   @Input()
-  data: XYPair[];
+  data: Point[];
 
   margin = { top: 20, right: 30, bottom: 30, left: 40 };
   height = 300;
@@ -84,7 +84,7 @@ export class GraphComponent implements OnChanges {
       );
 
     const line = d3
-      .line<XYPair>()
+      .line<Point>()
       .defined((d) => !isNaN(d.y))
       .x((d) => this.xScale(d.x))
       .y((d) => this.yScale(d.y));
@@ -108,7 +108,7 @@ export class GraphComponent implements OnChanges {
     element.appendChild(svg.node());
   }
 
-  private addGapPoints(data): XYPair[] {
+  private addGapPoints(data): Point[] {
     let previous;
     const result = [];
     for (const point of data) {

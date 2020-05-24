@@ -1,11 +1,11 @@
-. make a graph
-  . line graph with numerical data
-  . option for dots
+x make a graph
+  x line graph with numerical data
+  x option for dots
   . multiple series
   . colors
-  . that supports a date-type x-axis
+  x that supports a date-type x-axis
   . that supports a time-type y-axis
-  . that supports x-axis gaps in data with the option to either connect lines or disconnect when there's a gap of a certain size
+  x that supports x-axis gaps in data with the option to either connect lines or disconnect when there's a gap of a certain size
   . hover to show data
   . zoom
 

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { aapl } from '../aapl';
-import { Point } from '../graph/graph.component';
+import { Point, GraphOptions } from '../graph/graph.component';
 
 function parseExampleData(dataString: string): Point[] {
   return dataString
@@ -18,11 +18,9 @@ function parseExampleData(dataString: string): Point[] {
   styleUrls: ['./debug-page.component.scss'],
 })
 export class DebugPageComponent implements OnInit {
-  exampleData: Point[];
+  exampleData: Point[] = parseExampleData(aapl);
 
   constructor() {}
 
-  ngOnInit(): void {
-    this.exampleData = parseExampleData(aapl);
-  }
+  ngOnInit(): void {}
 }

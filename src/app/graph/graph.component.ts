@@ -1,9 +1,20 @@
 import { Component, ElementRef, OnInit, Input, OnChanges } from '@angular/core';
 import * as d3 from 'd3';
+import { DeepRequired, UnreachableCaseError } from 'ts-essentials';
+import { mergeDeep } from '../util';
 
 export interface Point {
   x: Date;
   y: number;
+}
+
+export interface GraphOptions {
+  type?: 'line' | 'dots'; // default line
+  lineOptions?: {
+    showGaps?: boolean; // default true
+    gapDistance?: number; // default 2 days?
+  };
+  // todo date vs number for x axis
 }
 
 const DAY_MS = 1000 * 60 * 60 * 24;
@@ -29,17 +40,23 @@ function addMilliseconds(d, ms) {
 export class GraphComponent implements OnChanges {
   @Input()
   data: Point[];
+  @Input()
+  options?: GraphOptions;
 
   margin = { top: 20, right: 30, bottom: 30, left: 40 };
   height = 300;
   width = 600;
   xScale: d3.ScaleTime<number, number>;
   yScale: d3.ScaleLinear<number, number>;
+  svg: d3.Selection<SVGSVGElement, undefined, null, undefined>;
 
   constructor(private elementRef: ElementRef) {}
 
   ngOnChanges(): void {
-    this.data = this.addGapPoints(this.data);
+    this.options = this.getOptions(this.options);
+    if (this.options.lineOptions.showGaps) {
+      this.data = this.addGapPoints(this.data);
+    }
 
     this.xScale = d3
       .scaleUtc()
@@ -56,7 +73,7 @@ export class GraphComponent implements OnChanges {
   }
 
   private drawGraph(): void {
-    const svg = d3
+    this.svg = d3
       .create('svg')
       .attr('viewBox', [0, 0, this.width, this.height] as any)
       .attr('fill', 'none')
@@ -66,7 +83,7 @@ export class GraphComponent implements OnChanges {
       .attr('height', this.height);
 
     // x axis
-    svg
+    this.svg
       .append('g')
       .call((g) =>
         g
@@ -75,7 +92,7 @@ export class GraphComponent implements OnChanges {
       );
 
     // y axis
-    svg
+    this.svg
       .append('g')
       .call((g) =>
         g
@@ -83,38 +100,60 @@ export class GraphComponent implements OnChanges {
           .call(d3.axisLeft(this.yScale))
       );
 
+    if (this.options.type === 'line') {
+      this.drawLineSeries();
+    } else if (this.options.type === 'dots') {
+      this.drawDotsSeries();
+    } else {
+      throw new UnreachableCaseError(this.options.type);
+    }
+
+    const element = this.elementRef.nativeElement as HTMLElement;
+    element.innerHTML = '';
+    element.appendChild(this.svg.node());
+  }
+
+  private drawDotsSeries(): void {
+    this.svg
+      .append('g')
+      .attr('fill', 'steelblue')
+      .selectAll('circle')
+      .data(this.data)
+      .join('circle')
+      .attr('cx', (d) => this.xScale(d.x))
+      .attr('cy', (d) => this.yScale(d.y))
+      .attr('r', 2);
+  }
+
+  private drawLineSeries() {
     const line = d3
       .line<Point>()
       .defined((d) => !isNaN(d.y))
       .x((d) => this.xScale(d.x))
       .y((d) => this.yScale(d.y));
 
-    svg
+    this.svg
       .append('path')
       .datum(this.data.filter(line.defined()))
       .attr('stroke', '#ccc')
       .attr('stroke-width', 0.5)
       .attr('d', line);
 
-    svg
+    this.svg
       .append('path')
       .datum(this.data)
       .attr('stroke', 'steelblue')
       .attr('stroke-width', 1.5)
       .attr('d', line);
-
-    const element = this.elementRef.nativeElement as HTMLElement;
-    element.innerHTML = '';
-    element.appendChild(svg.node());
   }
 
-  private addGapPoints(data): Point[] {
+  private addGapPoints(data: Point[]): Point[] {
     let previous;
     const result = [];
     for (const point of data) {
       if (previous) {
         const xChange = dateDifference(point.x, previous.x);
-        if (xChange > 32 * DAY_MS) {
+        if (xChange > this.options.lineOptions.gapDistance * DAY_MS) {
           result.push({
             date: addMilliseconds(point.x, -1 * DAY_MS),
             value: undefined,
@@ -125,5 +164,17 @@ export class GraphComponent implements OnChanges {
       previous = point;
     }
     return result;
+  }
+
+  private getOptions(options: GraphOptions): GraphOptions {
+    const defaultOptions: DeepRequired<GraphOptions> = {
+      type: 'line',
+      lineOptions: {
+        showGaps: true,
+        gapDistance: 2,
+      },
+    };
+    mergeDeep(defaultOptions, options);
+    return defaultOptions;
   }
 }

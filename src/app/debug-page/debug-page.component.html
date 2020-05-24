@@ -1,1 +1,29 @@
 <graph [data]="exampleData"></graph>
+
+<graph
+  [data]="exampleData"
+  [options]="{
+    type: 'line',
+    lineOptions: {
+      showGaps: true,
+      gapDistance: 32
+    }
+  }"
+></graph>
+
+<graph
+  [data]="exampleData"
+  [options]="{
+    type: 'line',
+    lineOptions: {
+      showGaps: false
+    }
+  }"
+></graph>
+
+<graph
+  [data]="exampleData"
+  [options]="{
+    type: 'dots'
+  }"
+></graph>

@@ -1,6 +1,7 @@
 <graph
-  [data]="exampleData"
+  [data]="exampleDateData"
   [options]="{
+    xType: 'date',
     seriesType: 'line',
     lineOptions: {
       showGaps: true,
@@ -10,18 +11,30 @@
 ></graph>
 
 <graph
-  [data]="exampleData"
+  [data]="exampleNumberData"
   [options]="{
+    xType: 'number',
     seriesType: 'line',
     lineOptions: {
-      showGaps: false
+      showGaps: true,
+      gapDistance: 2
     }
   }"
 ></graph>
 
-<graph
-  [data]="exampleData"
-  [options]="{
-    seriesType: 'dots'
-  }"
-></graph>
+<!--<graph-->
+<!--  [data]="exampleDateData"-->
+<!--  [options]="{-->
+<!--    seriesType: 'line',-->
+<!--    lineOptions: {-->
+<!--      showGaps: false-->
+<!--    }-->
+<!--  }"-->
+<!--&gt;</graph>-->
+
+<!--<graph-->
+<!--  [data]="exampleDateData"-->
+<!--  [options]="{-->
+<!--    seriesType: 'dots'-->
+<!--  }"-->
+<!--&gt;</graph>-->

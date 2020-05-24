@@ -3,12 +3,13 @@ import * as d3 from 'd3';
 import { DeepRequired, UnreachableCaseError } from 'ts-essentials';
 import { mergeDeep } from '../util';
 
-export interface Point {
-  x: Date;
+export interface Point<T = Date | number> {
+  x: T; // TODO how to properly handle this with typescript?
   y: number;
 }
 
 export interface GraphOptions {
+  xType: 'number' | 'date';
   seriesType: 'line' | 'dots';
   lineOptions?: {
     showGaps?: boolean; // default true
@@ -46,7 +47,7 @@ export class GraphComponent implements OnChanges {
   margin = { top: 20, right: 30, bottom: 30, left: 40 };
   height = 300;
   width = 600;
-  xScale: d3.ScaleTime<number, number>;
+  xScale: d3.ScaleTime<number, number> | d3.ScaleLinear<number, number>;
   yScale: d3.ScaleLinear<number, number>;
   svg: d3.Selection<SVGSVGElement, undefined, null, undefined>;
 
@@ -58,10 +59,19 @@ export class GraphComponent implements OnChanges {
       this.data = this.addGapPoints(this.data);
     }
 
-    this.xScale = d3
-      .scaleUtc()
-      .domain(d3.extent(this.data, (d) => d.x))
-      .range([this.margin.left, this.width - this.margin.right]);
+    if (this.options.xType === 'number') {
+      this.xScale = d3
+        .scaleLinear()
+        .domain(d3.extent(this.data, (d) => d.x))
+        .range([this.margin.left, this.width - this.margin.right]);
+    } else if (this.options.xType === 'date') {
+      this.xScale = d3
+        .scaleUtc()
+        .domain(d3.extent(this.data, (d) => d.x))
+        .range([this.margin.left, this.width - this.margin.right]);
+    } else {
+      throw new UnreachableCaseError(this.options.xType);
+    }
 
     this.yScale = d3
       .scaleLinear()
@@ -148,14 +158,30 @@ export class GraphComponent implements OnChanges {
   }
 
   private addGapPoints(data: Point[]): Point[] {
-    let previous;
+    let previous: Point;
     const result = [];
-    for (const point of data) {
+    for (let point of data) {
       if (previous) {
-        const xChange = dateDifference(point.x, previous.x);
-        if (xChange > this.options.lineOptions.gapDistance * DAY_MS) {
+        let xChange;
+        let xChangeMax;
+        let gapX;
+        if (this.options.xType === 'number') {
+          let numPoint = point as Point<number>;
+          const gapDistance = this.options.lineOptions.gapDistance;
+          xChange = numPoint.x - (previous as Point<number>).x;
+          xChangeMax = gapDistance;
+          gapX = numPoint.x - 0.5 * gapDistance;
+        } else if (this.options.xType === 'date') {
+          const gapDistanceDays = this.options.lineOptions.gapDistance * DAY_MS;
+          xChange = dateDifference(point.x, previous.x);
+          xChangeMax = gapDistanceDays;
+          gapX = addMilliseconds(point.x, -0.5 * gapDistanceDays);
+        } else {
+          throw new UnreachableCaseError(this.options.xType);
+        }
+        if (xChange > xChangeMax) {
           result.push({
-            date: addMilliseconds(point.x, -1 * DAY_MS),
+            x: gapX,
             value: undefined,
           });
         }
@@ -168,6 +194,7 @@ export class GraphComponent implements OnChanges {
 
   private getOptions(options: GraphOptions): GraphOptions {
     const defaultOptions: DeepRequired<GraphOptions> = {
+      xType: undefined,
       seriesType: undefined,
       lineOptions: {
         showGaps: true,

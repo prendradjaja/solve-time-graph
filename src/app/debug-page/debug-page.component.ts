@@ -18,7 +18,14 @@ function parseExampleData(dataString: string): Point[] {
   styleUrls: ['./debug-page.component.scss'],
 })
 export class DebugPageComponent implements OnInit {
-  exampleData: Point[] = parseExampleData(aapl);
+  exampleDateData: Point[] = parseExampleData(aapl);
+  exampleNumberData: Point[] = [
+    { x: 1, y: 1 },
+    { x: 2, y: 2 },
+    { x: 3, y: 1 },
+    { x: 10, y: 2 },
+    { x: 11, y: 1 },
+  ];
 
   constructor() {}
 

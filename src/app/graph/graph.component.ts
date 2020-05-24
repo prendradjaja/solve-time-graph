@@ -1,20 +1,9 @@
-import { Component, ElementRef, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, Input, OnChanges } from '@angular/core';
 import * as d3 from 'd3';
-import { aapl } from '../aapl';
 
-interface XYPair {
+export interface XYPair {
   x: Date;
   y: number;
-}
-
-function parseExampleData(dataString: string): XYPair[] {
-  return dataString
-    .trim()
-    .split('\n')
-    .map((line) => {
-      const [dateString, valueString] = line.split(',');
-      return { x: new Date(dateString), y: +valueString };
-    });
 }
 
 const DAY_MS = 1000 * 60 * 60 * 24;
@@ -37,8 +26,10 @@ function addMilliseconds(d, ms) {
   templateUrl: './graph.component.html',
   styleUrls: ['./graph.component.scss'],
 })
-export class GraphComponent implements OnInit {
+export class GraphComponent implements OnChanges {
+  @Input()
   data: XYPair[];
+
   margin = { top: 20, right: 30, bottom: 30, left: 40 };
   height = 300;
   width = 600;
@@ -47,27 +38,8 @@ export class GraphComponent implements OnInit {
 
   constructor(private elementRef: ElementRef) {}
 
-  ngOnInit(): void {
-    this.data = parseExampleData(aapl);
-    this.data = (() => {
-      let previous;
-      const result = [];
-      for (const point of this.data) {
-        if (previous) {
-          const xChange = dateDifference(point.x, previous.x);
-          if (xChange > 35 * DAY_MS) {
-            result.push({
-              date: addMilliseconds(point.x, -1 * DAY_MS),
-              value: undefined,
-            });
-          }
-        }
-        result.push(point);
-        previous = point;
-      }
-      return result;
-    })();
-    console.log(this.data);
+  ngOnChanges(): void {
+    this.data = this.addGapPoints(this.data);
 
     this.xScale = d3
       .scaleUtc()
@@ -80,10 +52,10 @@ export class GraphComponent implements OnInit {
       .nice()
       .range([this.height - this.margin.bottom, this.margin.top]);
 
-    this.makeGraph();
+    this.drawGraph();
   }
 
-  private makeGraph(): void {
+  private drawGraph(): void {
     const svg = d3
       .create('svg')
       .attr('viewBox', [0, 0, this.width, this.height] as any)
@@ -131,6 +103,27 @@ export class GraphComponent implements OnInit {
       .attr('stroke-width', 1.5)
       .attr('d', line);
 
-    this.elementRef.nativeElement.appendChild(svg.node());
+    const element = this.elementRef.nativeElement as HTMLElement;
+    element.innerHTML = '';
+    element.appendChild(svg.node());
+  }
+
+  private addGapPoints(data): XYPair[] {
+    let previous;
+    const result = [];
+    for (const point of data) {
+      if (previous) {
+        const xChange = dateDifference(point.x, previous.x);
+        if (xChange > 32 * DAY_MS) {
+          result.push({
+            date: addMilliseconds(point.x, -1 * DAY_MS),
+            value: undefined,
+          });
+        }
+      }
+      result.push(point);
+      previous = point;
+    }
+    return result;
   }
 }

@@ -9,7 +9,7 @@ export interface Point {
 }
 
 export interface GraphOptions {
-  seriesType?: 'line' | 'dots'; // default line
+  seriesType: 'line' | 'dots';
   lineOptions?: {
     showGaps?: boolean; // default true
     gapDistance?: number; // default 2 days?
@@ -168,7 +168,7 @@ export class GraphComponent implements OnChanges {
 
   private getOptions(options: GraphOptions): GraphOptions {
     const defaultOptions: DeepRequired<GraphOptions> = {
-      seriesType: 'line',
+      seriesType: undefined,
       lineOptions: {
         showGaps: true,
         gapDistance: 2,

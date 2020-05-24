@@ -3,8 +3,8 @@ import * as d3 from 'd3';
 import { aapl } from '../aapl';
 
 interface XYPair {
-  date: Date;
-  value: number;
+  x: Date;
+  y: number;
 }
 
 function parseExampleData(dataString: string): XYPair[] {
@@ -13,7 +13,7 @@ function parseExampleData(dataString: string): XYPair[] {
     .split('\n')
     .map((line) => {
       const [dateString, valueString] = line.split(',');
-      return { date: new Date(dateString), value: +valueString };
+      return { x: new Date(dateString), y: +valueString };
     });
 }
 
@@ -54,10 +54,10 @@ export class GraphComponent implements OnInit {
       const result = [];
       for (const point of this.data) {
         if (previous) {
-          const xChange = dateDifference(point.date, previous.date);
+          const xChange = dateDifference(point.x, previous.x);
           if (xChange > 35 * DAY_MS) {
             result.push({
-              date: addMilliseconds(point.date, -1 * DAY_MS),
+              date: addMilliseconds(point.x, -1 * DAY_MS),
               value: undefined,
             });
           }
@@ -71,12 +71,12 @@ export class GraphComponent implements OnInit {
 
     this.xScale = d3
       .scaleUtc()
-      .domain(d3.extent(this.data, (d) => d.date))
+      .domain(d3.extent(this.data, (d) => d.x))
       .range([this.margin.left, this.width - this.margin.right]);
 
     this.yScale = d3
       .scaleLinear()
-      .domain([0, d3.max(this.data, (d) => d.value)])
+      .domain([0, d3.max(this.data, (d) => d.y)])
       .nice()
       .range([this.height - this.margin.bottom, this.margin.top]);
 
@@ -113,9 +113,9 @@ export class GraphComponent implements OnInit {
 
     const line = d3
       .line<XYPair>()
-      .defined((d) => !isNaN(d.value))
-      .x((d) => this.xScale(d.date))
-      .y((d) => this.yScale(d.value));
+      .defined((d) => !isNaN(d.y))
+      .x((d) => this.xScale(d.x))
+      .y((d) => this.yScale(d.y));
 
     svg
       .append('path')

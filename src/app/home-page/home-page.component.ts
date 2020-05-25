@@ -63,6 +63,8 @@ export class HomePageComponent implements OnInit {
     this.logSeries('PB Ao5s', this.graphData.pbAo5);
     this.logSeries('PB singles', this.graphData.pbSingles);
 
+    this.getHistogram(this.solves.slice(-1000));
+
     // this.graphData.solvesByDate = this.solves.map((solve) => ({
     //   x: solve.date,
     //   y: solve.time,
@@ -120,6 +122,45 @@ export class HomePageComponent implements OnInit {
       }
     });
     return result;
+  }
+
+  private getHistogram(solves: SolveData[]) {
+    console.log(solves);
+    let remainder = solves;
+    let removedCount: number;
+
+    const cutoffs = [50, 40, 30, 20];
+    const counts: { name: string; count: number }[] = [];
+
+    ({ remainder, removedCount } = this.filterOutAndCount<SolveData>(
+      remainder,
+      (solve) => solve.isDNF
+    ));
+    counts.push({ name: 'dnfs', count: removedCount });
+
+    ({ remainder, removedCount } = this.filterOutAndCount<SolveData>(
+      remainder,
+      (solve) => solve.time >= cutoffs[0]
+    ));
+    counts.push({ name: 'high', count: removedCount });
+    cutoffs.slice(1).forEach((cutoff, i) => {
+      ({ remainder, removedCount } = this.filterOutAndCount<SolveData>(
+        remainder,
+        (solve) => solve.time >= cutoff
+      ));
+      const prevCutoff = cutoffs[i];
+      counts.push({ name: `lt${prevCutoff}`, count: removedCount });
+    });
+    counts.push({ name: `lt${cutoffs.slice(-1)[0]}`, count: remainder.length });
+    console.log(counts);
+  }
+
+  private filterOutAndCount<T>(items: T[], predicate: (item: T) => boolean) {
+    const remainder = items.filter((item) => !predicate(item));
+    return {
+      remainder,
+      removedCount: items.length - remainder.length,
+    };
   }
 
   private getBests(points: Point[]): Point[] {

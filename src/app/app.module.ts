@@ -7,6 +7,7 @@ import { DebugPageComponent } from './debug-page/debug-page.component';
 import { HomePageComponent } from './home-page/home-page.component';
 import { GraphComponent } from './graph/graph.component';
 import { HttpClientModule } from '@angular/common/http';
+import { StackedAreaGraphComponent } from './stacked-area-graph/stacked-area-graph.component';
 
 @NgModule({
   declarations: [
@@ -14,6 +15,7 @@ import { HttpClientModule } from '@angular/common/http';
     DebugPageComponent,
     HomePageComponent,
     GraphComponent,
+    StackedAreaGraphComponent,
   ],
   imports: [BrowserModule, AppRoutingModule, HttpClientModule],
   providers: [],

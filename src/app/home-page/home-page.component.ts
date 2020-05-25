@@ -5,6 +5,10 @@ import { aapl } from '../aapl';
 import { Point, SeriesType } from '../graph/graph.component';
 import { sum } from 'd3-array';
 import { UnreachableCaseError } from 'ts-essentials';
+import {
+  StackedAreaGraphPoint,
+  StackedAreaGraphData,
+} from '../stacked-area-graph/stacked-area-graph.component';
 
 function parseExampleData(dataString: string): Point[] {
   return dataString
@@ -24,6 +28,7 @@ function parseExampleData(dataString: string): Point[] {
 export class HomePageComponent implements OnInit {
   solves: SolveData[];
   graphData: { [key: string]: Point[] } = {};
+  stackedAreaGraphData: StackedAreaGraphData;
 
   exampleDateData: Point[] = parseExampleData(aapl);
   exampleNumberData: Point[] = [
@@ -62,6 +67,9 @@ export class HomePageComponent implements OnInit {
     this.logSeries('PB Ao12s', this.graphData.pbAo12);
     this.logSeries('PB Ao5s', this.graphData.pbAo5);
     this.logSeries('PB singles', this.graphData.pbSingles);
+
+    // console.log(this.getHistogram(this.solves.slice(-100)));
+    this.stackedAreaGraphData = this.getStackedAreaChartData(this.solves);
 
     // this.graphData.solvesByDate = this.solves.map((solve) => ({
     //   x: solve.date,
@@ -120,6 +128,75 @@ export class HomePageComponent implements OnInit {
       }
     });
     return result;
+  }
+
+  private getStackedAreaChartData(solves: SolveData[]): StackedAreaGraphData {
+    const sliceSize = 100;
+    const columns = ['x', ...this.getHistogramBuckets()];
+    const data: StackedAreaGraphPoint[] = solves
+      .slice(0, -sliceSize + 1)
+      .map((_, i, __) =>
+        this.getStackedAreaChartPoint(
+          i + sliceSize - 1,
+          solves.slice(i, i + sliceSize)
+        )
+      );
+    const result: StackedAreaGraphData = Object.assign(data, { columns });
+    return result;
+  }
+
+  private getHistogramBuckets() {
+    return this.getHistogram([])
+      .map((x) => x.name)
+      .reverse();
+  }
+
+  private getStackedAreaChartPoint(
+    x: number,
+    solves: SolveData[]
+  ): StackedAreaGraphPoint {
+    const histogram = this.getHistogram(solves);
+    const result: any = { x };
+    histogram.forEach((item) => (result[item.name] = item.count));
+    return result;
+  }
+
+  private getHistogram(solves: SolveData[]) {
+    let remainder = solves;
+    let removedCount: number;
+
+    const cutoffs = [50, 40, 30, 20];
+    const counts: { name: string; count: number }[] = [];
+
+    ({ remainder, removedCount } = this.filterOutAndCount<SolveData>(
+      remainder,
+      (solve) => solve.isDNF
+    ));
+    counts.push({ name: 'dnfs', count: removedCount });
+
+    ({ remainder, removedCount } = this.filterOutAndCount<SolveData>(
+      remainder,
+      (solve) => solve.time >= cutoffs[0]
+    ));
+    counts.push({ name: 'high', count: removedCount });
+    cutoffs.slice(1).forEach((cutoff, i) => {
+      ({ remainder, removedCount } = this.filterOutAndCount<SolveData>(
+        remainder,
+        (solve) => solve.time >= cutoff
+      ));
+      const prevCutoff = cutoffs[i];
+      counts.push({ name: `lt${prevCutoff}`, count: removedCount });
+    });
+    counts.push({ name: `lt${cutoffs.slice(-1)[0]}`, count: remainder.length });
+    return counts;
+  }
+
+  private filterOutAndCount<T>(items: T[], predicate: (item: T) => boolean) {
+    const remainder = items.filter((item) => !predicate(item));
+    return {
+      remainder,
+      removedCount: items.length - remainder.length,
+    };
   }
 
   private getBests(points: Point[]): Point[] {

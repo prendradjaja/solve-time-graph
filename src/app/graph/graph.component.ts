@@ -15,6 +15,7 @@ export interface GraphOptions {
     showGaps?: boolean; // default true
     gapDistance?: number; // default 2. will be interpreted as either number or days based on xType
   };
+  color?: string; // default steelblue
   // todo date vs number for x axis
 }
 
@@ -45,8 +46,8 @@ export class GraphComponent implements OnChanges {
   options?: GraphOptions;
 
   margin = { top: 20, right: 30, bottom: 30, left: 40 };
-  height = 700;
-  width = 1200;
+  height = 400;
+  width = 600;
   xScale: d3.ScaleTime<number, number> | d3.ScaleLinear<number, number>;
   yScale: d3.ScaleLinear<number, number>;
   svg: d3.Selection<SVGSVGElement, undefined, null, undefined>;
@@ -126,7 +127,7 @@ export class GraphComponent implements OnChanges {
   private drawDotsSeries(): void {
     this.svg
       .append('g')
-      .attr('fill', 'steelblue')
+      .attr('fill', this.options.color)
       .selectAll('circle')
       .data(this.data)
       .join('circle')
@@ -152,7 +153,7 @@ export class GraphComponent implements OnChanges {
     this.svg
       .append('path')
       .datum(this.data)
-      .attr('stroke', 'steelblue')
+      .attr('stroke', this.options.color)
       .attr('stroke-width', 1.5)
       .attr('d', line);
   }
@@ -200,6 +201,7 @@ export class GraphComponent implements OnChanges {
         showGaps: true,
         gapDistance: 2,
       },
+      color: 'steelblue'
     };
     mergeDeep(defaultOptions, options);
     return defaultOptions;

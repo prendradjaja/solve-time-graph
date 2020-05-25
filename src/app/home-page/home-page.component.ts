@@ -94,7 +94,7 @@ export class HomePageComponent implements OnInit {
     let result: Point[] = [];
     solves.forEach((solve, i) => {
       const start = i - averageOf + 1;
-      const end = i;
+      const end = i + 1;
       if (start >= 0) {
         let items = solves
           .slice(start, end)

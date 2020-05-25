@@ -63,7 +63,7 @@ export class HomePageComponent implements OnInit {
     this.logSeries('PB Ao5s', this.graphData.pbAo5);
     this.logSeries('PB singles', this.graphData.pbSingles);
 
-    this.getHistogram(this.solves.slice(-1000));
+    this.getHistogram(this.solves.slice(-100));
 
     // this.graphData.solvesByDate = this.solves.map((solve) => ({
     //   x: solve.date,
@@ -124,8 +124,9 @@ export class HomePageComponent implements OnInit {
     return result;
   }
 
+  private getStackedAreaChartData(solves: SolveData[]) {}
+
   private getHistogram(solves: SolveData[]) {
-    console.log(solves);
     let remainder = solves;
     let removedCount: number;
 
@@ -152,7 +153,7 @@ export class HomePageComponent implements OnInit {
       counts.push({ name: `lt${prevCutoff}`, count: removedCount });
     });
     counts.push({ name: `lt${cutoffs.slice(-1)[0]}`, count: remainder.length });
-    console.log(counts);
+    return counts;
   }
 
   private filterOutAndCount<T>(items: T[], predicate: (item: T) => boolean) {

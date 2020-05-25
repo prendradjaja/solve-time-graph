@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { SolveData } from '../solves-data-resolver.service';
 import { aapl } from '../aapl';
-import { Point } from '../graph/graph.component';
+import { Point, SeriesType } from '../graph/graph.component';
 import { sum } from 'd3-array';
 import { UnreachableCaseError } from 'ts-essentials';
 
@@ -33,6 +33,9 @@ export class HomePageComponent implements OnInit {
     { x: 10, y: 2 },
     { x: 11, y: 1 },
   ];
+
+  DOTS: SeriesType = 'dots';
+  LINE: SeriesType = 'line';
 
   constructor(private route: ActivatedRoute) {
     (window as any).homePage = this;

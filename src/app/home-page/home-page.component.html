@@ -42,3 +42,33 @@
     xType: 'number'
   }"
 ></graph>
+
+<graph
+  [serieses]="[
+    {
+      points: graphData.solveCountByDate,
+      options: {
+        seriesType: DOTS,
+        color: 'green'
+      }
+    }
+  ]"
+  [options]="{
+    xType: 'date'
+  }"
+></graph>
+
+<graph
+  [serieses]="[
+    {
+      points: graphData.solveCountByWeek,
+      options: {
+        seriesType: DOTS,
+        color: 'blue'
+      }
+    }
+  ]"
+  [options]="{
+    xType: 'date'
+  }"
+></graph>

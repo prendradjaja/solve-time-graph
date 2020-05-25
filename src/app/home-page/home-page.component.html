@@ -1,20 +1,40 @@
 <graph
   [serieses]="[
     {
-      points: graphData.solvesByNumber,
-      options:{
+      points: graphData.solves,
+      options: {
         seriesType: DOTS,
-        color: 'lightblue'
+        color: 'white'
       }
     },
     {
-      points: graphData.averages,
-      options:{
+      points: graphData.ao50,
+      options: {
         seriesType: LINE,
         lineOptions: {
           showGaps: false
         },
         color: 'red'
+      }
+    },
+    {
+      points: graphData.ao100,
+      options: {
+        seriesType: LINE,
+        lineOptions: {
+          showGaps: false
+        },
+        color: 'green'
+      }
+    },
+    {
+      points: graphData.pbSingles,
+      options: {
+        seriesType: LINE,
+        lineOptions: {
+          showGaps: false
+        },
+        color: '#e8c202'
       }
     }
   ]"

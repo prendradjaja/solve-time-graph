@@ -43,20 +43,28 @@ export class HomePageComponent implements OnInit {
 
   ngOnInit(): void {
     this.solves = this.route.snapshot.data.solves;
-    this.graphData.solvesByNumber = this.solves.map((solve, i) => ({
+    this.graphData.solves = this.solves.map((solve, i) => ({
       x: i,
       y: solve.time,
     }));
-    this.graphData.solvesByDate = this.solves.map((solve) => ({
-      x: solve.date,
-      y: solve.time,
-    }));
-    this.graphData.averages = this.getMovingAverage(
+    this.graphData.ao50 = this.getMovingAverage(
       this.solves,
       50,
       3,
       'number'
     );
+    this.graphData.ao100 = this.getMovingAverage(
+      this.solves,
+      100,
+      5,
+      'number'
+    );
+    this.graphData.pbSingles = this.getBests(this.graphData.solves);
+
+    // this.graphData.solvesByDate = this.solves.map((solve) => ({
+    //   x: solve.date,
+    //   y: solve.time,
+    // }));
   }
 
   /**
@@ -109,6 +117,20 @@ export class HomePageComponent implements OnInit {
         });
       }
     });
+    return result;
+  }
+
+  private getBests(points: Point[]): Point[] {
+    let result: Point[] = [];
+    for (const point of points) {
+      const currentBest: Point = result.slice(-1)[0] || {
+        x: undefined,
+        y: Infinity,
+      };
+      if (point.y < currentBest.y) {
+        result.push(point);
+      }
+    }
     return result;
   }
 }

@@ -1,17 +1,16 @@
-<!--TODO webstorm complains bc 'dots' is a string and string is not a 'dots'-->
 <graph
   [serieses]="[
     {
       points: graphData.solvesByNumber,
       options:{
-        seriesType: 'dots',
+        seriesType: DOTS,
         color: 'lightblue'
       }
     },
     {
       points: graphData.averages,
       options:{
-        seriesType: 'line',
+        seriesType: LINE,
         lineOptions: {
           showGaps: false
         },

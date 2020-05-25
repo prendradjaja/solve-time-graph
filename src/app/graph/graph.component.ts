@@ -18,13 +18,15 @@ export interface GraphOptions {
 }
 
 export interface SeriesOptions {
-  seriesType: 'line' | 'dots';
+  seriesType: SeriesType;
   lineOptions?: {
     showGaps?: boolean; // default true
     gapDistance?: number; // default 2. will be interpreted as either number or days based on xType
   };
   color?: string; // default steelblue
 }
+
+export type SeriesType = 'line' | 'dots';
 
 const DAY_MS = 1000 * 60 * 60 * 24;
 

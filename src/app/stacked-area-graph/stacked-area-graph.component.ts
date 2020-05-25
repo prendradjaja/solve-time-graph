@@ -1,9 +1,11 @@
 import { Component, OnInit, ElementRef, Input } from '@angular/core';
 import * as d3 from 'd3';
 
-type StackedAreaGraphData = StackedAreaGraphPoint[] & { columns: string[] };
+export type StackedAreaGraphData = StackedAreaGraphPoint[] & {
+  columns: string[];
+};
 
-type StackedAreaGraphPoint = {
+export type StackedAreaGraphPoint = {
   x: number;
 } & {
   [key: string]: number;
@@ -35,14 +37,14 @@ export class StackedAreaGraphComponent implements OnInit {
   constructor(private elementRef: ElementRef) {}
 
   ngOnInit(): void {
-    const margin = { top: 10, right: 20, bottom: 20, left: 40 };
-    const height = 500;
-    const width = 800;
+    const margin = { top: 10, right: 30, bottom: 20, left: 40 };
+    const height = 400;
+    const width = 600;
     const data = this.data || exampleData;
     const y = d3.scaleLinear().range([height - margin.bottom, margin.top]);
     const x = d3
       .scaleLinear()
-      .domain(d3.extent(data, (d) => d.x))
+      .domain([0, d3.max(data, (d) => d.x)])
       .range([margin.left, width - margin.right]);
     const yAxis = (g) =>
       g
@@ -94,5 +96,17 @@ export class StackedAreaGraphComponent implements OnInit {
     const element = this.elementRef.nativeElement as HTMLElement;
     element.innerHTML = '';
     element.appendChild(svg.node());
+
+    data.columns
+      .slice(1)
+      .reverse()
+      .forEach((key) => {
+        const myColor = color(key) as string;
+        const keyElement = document.createElement('div') as HTMLDivElement;
+        keyElement.style.backgroundColor = myColor;
+        keyElement.style.color = 'white';
+        keyElement.innerHTML = key;
+        element.appendChild(keyElement);
+      });
   }
 }

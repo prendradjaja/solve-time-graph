@@ -8,19 +8,20 @@ x make a graph
   x that supports x-axis gaps in data with the option to either connect lines or disconnect when there's a gap of a certain size
   . hover to show data
   . zoom
+. make a repo for my solves data
 
-R = recreate twisty timer’s functionality
-E = expand existing functionality
-N = new functionality entirely
+- R = recreate twisty timer’s functionality
+- E = expand existing functionality
+- N = new functionality entirely
 
-R. big solves vs times graph
-R. with Ao50, Ao100 line
-R. with best singles
-R. with zoom
-E. option for dots instead of lines
-E. option for date instead of solves
-E. show best Ao12s, Ao5s like best singles
-E. connect best AoXs like best singles are connected
-N. hover to see date
-N. “what percent of solves fall into which time buckets?” stacked percent chart
-N. show the solves in an AoX
+x R big solves vs times graph
+. R with Ao50, Ao100 line
+. R with best singles
+. R with zoom
+x E option for dots instead of lines
+x E option for date instead of solves
+. E show best Ao12s, Ao5s like best singles
+. E connect best AoXs like best singles are connected
+. N hover to see date
+. N “what percent of solves fall into which time buckets?” stacked percent chart
+. N show the solves in an AoX

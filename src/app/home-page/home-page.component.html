@@ -1,1 +1,15 @@
-<p>home-page works!</p>
+<graph
+  [data]="solvesByNumber"
+  [options]="{
+    xType: 'number',
+    seriesType: 'line'
+  }"
+></graph>
+
+<graph
+  [data]="solvesByDate"
+  [options]="{
+    xType: 'date',
+    seriesType: 'dots'
+  }"
+></graph>

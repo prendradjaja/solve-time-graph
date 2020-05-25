@@ -13,7 +13,7 @@ export interface GraphOptions {
   seriesType: 'line' | 'dots';
   lineOptions?: {
     showGaps?: boolean; // default true
-    gapDistance?: number; // default 2 days?
+    gapDistance?: number; // default 2. will be interpreted as either number or days based on xType
   };
   // todo date vs number for x axis
 }
@@ -45,8 +45,8 @@ export class GraphComponent implements OnChanges {
   options?: GraphOptions;
 
   margin = { top: 20, right: 30, bottom: 30, left: 40 };
-  height = 300;
-  width = 600;
+  height = 700;
+  width = 1200;
   xScale: d3.ScaleTime<number, number> | d3.ScaleLinear<number, number>;
   yScale: d3.ScaleLinear<number, number>;
   svg: d3.Selection<SVGSVGElement, undefined, null, undefined>;
@@ -55,7 +55,7 @@ export class GraphComponent implements OnChanges {
 
   ngOnChanges(): void {
     this.options = this.getOptions(this.options);
-    if (this.options.lineOptions.showGaps) {
+    if (this.options.seriesType === 'line' && this.options.lineOptions.showGaps) {
       this.data = this.addGapPoints(this.data);
     }
 

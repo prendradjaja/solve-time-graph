@@ -192,7 +192,8 @@ export class GraphComponent implements OnChanges {
           xChangeMax = gapDistance;
           gapX = numPoint.x - 0.5 * gapDistance;
         } else if (this.options.xType === 'date') {
-          const gapDistanceDays = series.options.lineOptions.gapDistance * DAY_MS;
+          const gapDistanceDays =
+            series.options.lineOptions.gapDistance * DAY_MS;
           xChange = dateDifference(point.x, previous.x);
           xChangeMax = gapDistanceDays;
           gapX = addMilliseconds(point.x, -0.5 * gapDistanceDays);

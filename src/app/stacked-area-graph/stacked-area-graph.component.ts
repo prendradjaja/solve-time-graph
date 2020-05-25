@@ -4,21 +4,21 @@ import * as d3 from 'd3';
 type StackedAreaGraphData = StackedAreaGraphPoint[] & { columns: string[] };
 
 type StackedAreaGraphPoint = {
-  date: Date;
+  x: number;
 } & {
   [key: string]: number;
 };
 
 const exampleData: StackedAreaGraphData = ([
-  makePoint('2020-01-01', { A: 10, B: 20 }),
-  makePoint('2020-01-02', { A: 20, B: 20 }),
-  makePoint('2020-01-03', { A: 30, B: 20 }),
-  makePoint('2020-01-04', { A: 80, B: 20 }),
+  makePoint(1, { A: 10, B: 20 }),
+  makePoint(2, { A: 20, B: 20 }),
+  makePoint(3, { A: 30, B: 20 }),
+  makePoint(4, { A: 80, B: 20 }),
 ] as StackedAreaGraphPoint[]) as any;
-exampleData.columns = ['date', 'A', 'B'];
+exampleData.columns = ['x', 'A', 'B'];
 
-function makePoint(dateString: string, data: any): StackedAreaGraphPoint {
-  return Object.assign(data, { date: new Date(dateString) });
+function makePoint(x: number, data: any): StackedAreaGraphPoint {
+  return Object.assign(data, { x });
 }
 
 // https://observablehq.com/@d3/normalized-stacked-area-chart
@@ -41,8 +41,8 @@ export class StackedAreaGraphComponent implements OnInit {
     const data = this.data || exampleData;
     const y = d3.scaleLinear().range([height - margin.bottom, margin.top]);
     const x = d3
-      .scaleTime()
-      .domain(d3.extent(data, (d) => d.date))
+      .scaleLinear()
+      .domain(d3.extent(data, (d) => d.x))
       .range([margin.left, width - margin.right]);
     const yAxis = (g) =>
       g
@@ -62,7 +62,7 @@ export class StackedAreaGraphComponent implements OnInit {
       .range(d3.schemeCategory10);
     const area = d3
       .area()
-      .x((d) => x((d as any).data.date)) // TODO why doesn't typescript like this
+      .x((d) => x((d as any).data.x)) // TODO why doesn't typescript like this
       .y0((d) => y(d[0]))
       .y1((d) => y(d[1]));
     const series = d3

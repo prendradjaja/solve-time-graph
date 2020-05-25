@@ -3,6 +3,8 @@ import { ActivatedRoute } from '@angular/router';
 import { SolveData } from '../solves-data-resolver.service';
 import { aapl } from '../aapl';
 import { Point } from '../graph/graph.component';
+import { sum } from 'd3-array';
+import { UnreachableCaseError } from 'ts-essentials';
 
 function parseExampleData(dataString: string): Point[] {
   return dataString
@@ -21,9 +23,7 @@ function parseExampleData(dataString: string): Point[] {
 })
 export class HomePageComponent implements OnInit {
   solves: SolveData[];
-  solvesByNumber: Point[];
-  solvesByDate: Point[];
-
+  graphData: { [key: string]: Point[] } = {};
 
   exampleDateData: Point[] = parseExampleData(aapl);
   exampleNumberData: Point[] = [
@@ -34,17 +34,74 @@ export class HomePageComponent implements OnInit {
     { x: 11, y: 1 },
   ];
 
-  constructor(private route: ActivatedRoute) {}
+  constructor(private route: ActivatedRoute) {
+    (window as any).homePage = this;
+  }
 
   ngOnInit(): void {
     this.solves = this.route.snapshot.data.solves;
-    this.solvesByNumber = this.solves.map((solve, i) => ({
+    this.graphData.solvesByNumber = this.solves.map((solve, i) => ({
       x: i,
-      y: solve.time
-    }))
-    this.solvesByDate = this.solves.map(solve => ({
+      y: solve.time,
+    }));
+    this.graphData.solvesByDate = this.solves.map((solve) => ({
       x: solve.date,
-      y: solve.time
-    }))
+      y: solve.time,
+    }));
+    this.graphData.averages = this.getMovingAverage(
+      this.solves,
+      50,
+      3,
+      'number'
+    );
+  }
+
+  /**
+   * Returns a new series e.g.
+   *
+   * getMovingAverage(
+   *   [
+   *     { x: 1, y: 10 },
+   *     { x: 2, y: 20 },
+   *     { x: 3, y: 30 },
+   *   ],
+   *   2,
+   *   0
+   * );
+   * // returns [({ x: 2, y: 15 }, { x: 3, y: 25 })]
+   */
+  private getMovingAverage(
+    solves: SolveData[],
+    averageOf: number,
+    trimEachSide: number,
+    by: 'number' | 'date'
+  ): Point[] {
+    let result: Point[] = [];
+    solves.forEach((solve, i) => {
+      const start = i - averageOf + 1;
+      const end = i;
+      if (start >= 0) {
+        let items = solves
+          .slice(start, end)
+          .map((solve) => (!solve.isDNF ? solve.time : Infinity));
+        items.sort();
+        items = items.slice(trimEachSide, -trimEachSide);
+        let average = sum(items) / items.length;
+        average = Number.isFinite(average) ? average : undefined;
+        let x;
+        if (by === 'number') {
+          x = i;
+        } else if (by === 'date') {
+          x = solve.date;
+        } else {
+          throw new UnreachableCaseError(by);
+        }
+        result.push({
+          x,
+          y: average,
+        });
+      }
+    });
+    return result;
   }
 }

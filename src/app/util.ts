@@ -28,3 +28,7 @@ export function mergeDeep(target, ...sources) {
 
   return mergeDeep(target, ...sources);
 }
+
+// export function sum(numbers: number[]): number {
+//   return numbers.reduce((a, b) => a + b, 0);
+// }

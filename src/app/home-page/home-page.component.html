@@ -1,5 +1,5 @@
-<graph
-  [data]="solvesByNumber"
+<!-- <graph
+  [data]="graphData.solvesByNumber"
   [options]="{
     xType: 'number',
     seriesType: 'line'
@@ -7,9 +7,25 @@
 ></graph>
 
 <graph
-  [data]="solvesByDate"
+  [data]="graphData.solvesByDate"
   [options]="{
     xType: 'date',
     seriesType: 'dots'
   }"
+></graph> -->
+
+<graph
+  [data]="graphData.averages"
+  [options]="{
+    xType: 'number',
+    seriesType: 'line'
+  }"
 ></graph>
+
+<!-- <graph
+  [data]="graphData.solvesByDate"
+  [options]="{
+    xType: 'date',
+    seriesType: 'dots'
+  }"
+></graph> -->

@@ -29,3 +29,6 @@ x E option for date instead of solves
 . N hover to see date
 . N “what percent of solves fall into which time buckets?” stacked percent chart
 . N show the solves in an AoX
+
+to ideate:
+. solves per day or week or smth (or beeswarm graph?)

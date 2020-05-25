@@ -68,7 +68,11 @@ export class HomePageComponent implements OnInit {
    *   2,
    *   0
    * );
-   * // returns [({ x: 2, y: 15 }, { x: 3, y: 25 })]
+   * returns
+   * [
+   *   { x: 2, y: 15 },
+   *   { x: 3, y: 25 }
+   * ]
    */
   private getMovingAverage(
     solves: SolveData[],

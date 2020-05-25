@@ -47,45 +47,23 @@ export class HomePageComponent implements OnInit {
       x: i,
       y: solve.time,
     }));
-    this.graphData.ao50 = this.getMovingAverage(
-      this.solves,
-      50,
-      3,
-      'number'
-    );
-    this.graphData.ao100 = this.getMovingAverage(
-      this.solves,
-      100,
-      5,
-      'number'
-    );
+    this.graphData.ao50 = this.getMovingAverage(this.solves, 50, 3, 'number');
+    this.graphData.ao100 = this.getMovingAverage(this.solves, 100, 5, 'number');
     this.graphData.pbSingles = this.getBests(this.graphData.solves);
 
-    this.graphData.ao12 = this.getMovingAverage(
-      this.solves,
-      12,
-      1,
-      'number'
-    );
-    window['ao5'] =true
-    this.graphData.ao5 = this.getMovingAverage(
-      this.solves,
-      5,
-      1,
-      'number'
-    );
-    window['ao5'] = false
-    this.graphData.pbAo100 = this.getBests(this.graphData.ao100)
-    this.graphData.pbAo50 = this.getBests(this.graphData.ao50)
-    this.graphData.pbAo12 = this.getBests(this.graphData.ao12)
-    this.graphData.pbAo5 = this.getBests(this.graphData.ao5)
+    this.graphData.ao12 = this.getMovingAverage(this.solves, 12, 1, 'number');
+    window['ao5'] = true;
+    this.graphData.ao5 = this.getMovingAverage(this.solves, 5, 1, 'number');
+    window['ao5'] = false;
+    this.graphData.pbAo100 = this.getBests(this.graphData.ao100);
+    this.graphData.pbAo50 = this.getBests(this.graphData.ao50);
+    this.graphData.pbAo12 = this.getBests(this.graphData.ao12);
+    this.graphData.pbAo5 = this.getBests(this.graphData.ao5);
 
-    this.logSeries('PB Ao100s', this.graphData.pbAo100)
-    this.logSeries('PB Ao12s', this.graphData.pbAo12)
-    this.logSeries('PB Ao5s', this.graphData.pbAo5)
-    this.logSeries('PB singles', this.graphData.pbSingles)
-
-
+    this.logSeries('PB Ao100s', this.graphData.pbAo100);
+    this.logSeries('PB Ao12s', this.graphData.pbAo12);
+    this.logSeries('PB Ao5s', this.graphData.pbAo5);
+    this.logSeries('PB singles', this.graphData.pbSingles);
 
     // this.graphData.solvesByDate = this.solves.map((solve) => ({
     //   x: solve.date,
@@ -160,13 +138,20 @@ export class HomePageComponent implements OnInit {
     return result;
   }
 
-  private logSeries(seriesName: string, seriesData: Point[]) :void{
-    console.group(seriesName)
+  private logSeries(seriesName: string, seriesData: Point[]): void {
+    console.group(seriesName);
     seriesData.forEach((point, i) => {
       const time = point.y.toFixed(2); // TODO this rounds -- probably in cubing we truncate? not sure
-      const date = this.solves[point.x as number].date.toDateString()
-      console.log(i.toString() + '.', date, '\t', time, '\t', point.x)
-    })
-    console.groupEnd()
+      const date = this.solves[point.x as number].date.toDateString();
+      console.log(
+        i.toString() + '.',
+        date,
+        '\t',
+        time,
+        '\t'
+        // point.x
+      );
+    });
+    console.groupEnd();
   }
 }

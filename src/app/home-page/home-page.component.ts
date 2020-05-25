@@ -16,6 +16,12 @@ function parseExampleData(dataString: string): Point[] {
     });
 }
 
+const DAY_MS = 1000 * 60 * 60 * 24;
+
+function addMilliseconds(d, ms) {
+  return new Date(d.valueOf() + ms);
+}
+
 @Component({
   selector: 'home-page',
   templateUrl: './home-page.component.html',
@@ -63,10 +69,16 @@ export class HomePageComponent implements OnInit {
     this.logSeries('PB Ao5s', this.graphData.pbAo5);
     this.logSeries('PB singles', this.graphData.pbSingles);
 
-    // this.graphData.solvesByDate = this.solves.map((solve) => ({
-    //   x: solve.date,
-    //   y: solve.time,
-    // }));
+    this.graphData.solvesByDate = this.solves.map((solve) => ({
+      x: solve.date,
+      y: solve.time,
+    }));
+    this.graphData.solveCountByDate = this.getDailyCounts(
+      this.graphData.solvesByDate as Point<Date>[]
+    );
+    this.graphData.solveCountByWeek = this.getWeeklyCounts(
+      this.graphData.solvesByDate as Point<Date>[]
+    );
   }
 
   /**
@@ -151,5 +163,41 @@ export class HomePageComponent implements OnInit {
       );
     });
     console.groupEnd();
+  }
+
+  private getDailyCounts(solves: Point<Date>[]) {
+    // TODO should be using a date lib
+    const dailyCounts: { [date: string]: number } = {};
+    solves.forEach((solve) => {
+      const dateString = solve.x.toDateString();
+      if (!dailyCounts[dateString]) {
+        dailyCounts[dateString] = 0;
+      }
+      dailyCounts[dateString]++;
+    });
+    const result: Point<Date>[] = [];
+    for (const dateString in dailyCounts) {
+      result.push({ x: new Date(dateString), y: dailyCounts[dateString] });
+    }
+    return result;
+  }
+
+  private getWeeklyCounts(solves: Point<Date>[]) {
+    // TODO should be using a date lib
+    const weeklyCounts: { [date: string]: number } = {};
+    solves.forEach((solve) => {
+      const date = new Date(solve.x.toDateString());
+      const startOfWeek = addMilliseconds(date, -1 * date.getDay() * DAY_MS);
+      const weekString = startOfWeek.toDateString();
+      if (!weeklyCounts[weekString]) {
+        weeklyCounts[weekString] = 0;
+      }
+      weeklyCounts[weekString]++;
+    });
+    const result: Point<Date>[] = [];
+    for (const weekString in weeklyCounts) {
+      result.push({ x: new Date(weekString), y: weeklyCounts[weekString] });
+    }
+    return result;
   }
 }

@@ -67,16 +67,15 @@ export class GraphComponent implements OnChanges {
     this.options = this.getOptions(this.options);
     this.serieses = this.maybeAddGapPoints(this.serieses);
 
-    // TODO all serieses not just 0th (also for y scale)
     if (this.options.xType === 'number') {
       this.xScale = d3
         .scaleLinear()
-        .domain(d3.extent(this.serieses[0].points, (d) => d.x))
+        .domain(this.getXExtent())
         .range([this.margin.left, this.width - this.margin.right]);
     } else if (this.options.xType === 'date') {
       this.xScale = d3
         .scaleUtc()
-        .domain(d3.extent(this.serieses[0].points, (d) => d.x))
+        .domain(this.getXExtent())
         .range([this.margin.left, this.width - this.margin.right]);
     } else {
       throw new UnreachableCaseError(this.options.xType);
@@ -84,7 +83,7 @@ export class GraphComponent implements OnChanges {
 
     this.yScale = d3
       .scaleLinear()
-      .domain([0, d3.max(this.serieses[0].points, (d) => d.y)])
+      .domain(this.getYExtent())
       .nice()
       .range([this.height - this.margin.bottom, this.margin.top]);
 
@@ -211,6 +210,16 @@ export class GraphComponent implements OnChanges {
       previous = point;
     }
     return result;
+  }
+
+  private getXExtent() {
+    const allPoints: Point[] = this.serieses.flatMap((series) => series.points);
+    return d3.extent(allPoints, (d) => d.x);
+  }
+
+  private getYExtent() {
+    const allPoints: Point[] = this.serieses.flatMap((series) => series.points);
+    return [0, d3.max(allPoints, (d) => d.y)];
   }
 
   private getOptions(options: GraphOptions): GraphOptions {

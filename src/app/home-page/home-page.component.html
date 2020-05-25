@@ -1,10 +1,28 @@
 <graph
-  [data]="graphData.solvesByNumber"
+  [serieses]="[
+    {
+      points: graphData.solvesByNumber,
+      options:{
+        seriesType: 'dots',
+        color: 'lightblue'
+      }
+    },
+    {
+      points: graphData.averages,
+      options:{
+        seriesType: 'line',
+        lineOptions: {
+          showGaps: false
+        },
+        color: 'red'
+      }
+    }
+  ]"
   [options]="{
-    xType: 'number',
-    seriesType: 'line'
+    xType: 'number'
   }"
 ></graph>
+<!--    seriesType: 'line'-->
 
 <!-- <graph
   [data]="graphData.solvesByDate"
@@ -14,14 +32,14 @@
   }"
 ></graph> -->
 
-<graph
-  [data]="graphData.averages"
-  [options]="{
-    xType: 'number',
-    seriesType: 'line',
-    color: 'red'
-  }"
-></graph>
+<!--<graph-->
+<!--  [data]="graphData.averages"-->
+<!--  [options]="{-->
+<!--    xType: 'number',-->
+<!--    seriesType: 'line',-->
+<!--    color: 'red'-->
+<!--  }"-->
+<!--&gt;</graph>-->
 
 <!-- <graph
   [data]="graphData.solvesByDate"

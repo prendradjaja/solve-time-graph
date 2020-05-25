@@ -3,6 +3,11 @@ import * as d3 from 'd3';
 import { DeepRequired, UnreachableCaseError } from 'ts-essentials';
 import { mergeDeep } from '../util';
 
+export interface Series {
+  points: Point[];
+  options: SeriesOptions;
+}
+
 export interface Point<T = Date | number> {
   x: T; // TODO how to properly handle this with typescript?
   y: number;
@@ -10,13 +15,15 @@ export interface Point<T = Date | number> {
 
 export interface GraphOptions {
   xType: 'number' | 'date';
+}
+
+export interface SeriesOptions {
   seriesType: 'line' | 'dots';
   lineOptions?: {
     showGaps?: boolean; // default true
     gapDistance?: number; // default 2. will be interpreted as either number or days based on xType
   };
   color?: string; // default steelblue
-  // todo date vs number for x axis
 }
 
 const DAY_MS = 1000 * 60 * 60 * 24;
@@ -41,7 +48,7 @@ function addMilliseconds(d, ms) {
 })
 export class GraphComponent implements OnChanges {
   @Input()
-  data: Point[];
+  serieses: Series[];
   @Input()
   options?: GraphOptions;
 
@@ -56,19 +63,18 @@ export class GraphComponent implements OnChanges {
 
   ngOnChanges(): void {
     this.options = this.getOptions(this.options);
-    if (this.options.seriesType === 'line' && this.options.lineOptions.showGaps) {
-      this.data = this.addGapPoints(this.data);
-    }
+    this.serieses = this.maybeAddGapPoints(this.serieses);
 
+    // TODO all serieses not just 0th (also for y scale)
     if (this.options.xType === 'number') {
       this.xScale = d3
         .scaleLinear()
-        .domain(d3.extent(this.data, (d) => d.x))
+        .domain(d3.extent(this.serieses[0].points, (d) => d.x))
         .range([this.margin.left, this.width - this.margin.right]);
     } else if (this.options.xType === 'date') {
       this.xScale = d3
         .scaleUtc()
-        .domain(d3.extent(this.data, (d) => d.x))
+        .domain(d3.extent(this.serieses[0].points, (d) => d.x))
         .range([this.margin.left, this.width - this.margin.right]);
     } else {
       throw new UnreachableCaseError(this.options.xType);
@@ -76,7 +82,7 @@ export class GraphComponent implements OnChanges {
 
     this.yScale = d3
       .scaleLinear()
-      .domain([0, d3.max(this.data, (d) => d.y)])
+      .domain([0, d3.max(this.serieses[0].points, (d) => d.y)])
       .nice()
       .range([this.height - this.margin.bottom, this.margin.top]);
 
@@ -111,12 +117,14 @@ export class GraphComponent implements OnChanges {
           .call(d3.axisLeft(this.yScale))
       );
 
-    if (this.options.seriesType === 'line') {
-      this.drawLineSeries();
-    } else if (this.options.seriesType === 'dots') {
-      this.drawDotsSeries();
-    } else {
-      throw new UnreachableCaseError(this.options.seriesType);
+    for (const series of this.serieses) {
+      if (series.options.seriesType === 'line') {
+        this.drawLineSeries(series);
+      } else if (series.options.seriesType === 'dots') {
+        this.drawDotsSeries(series);
+      } else {
+        throw new UnreachableCaseError(series.options.seriesType);
+      }
     }
 
     const element = this.elementRef.nativeElement as HTMLElement;
@@ -124,19 +132,19 @@ export class GraphComponent implements OnChanges {
     element.appendChild(this.svg.node());
   }
 
-  private drawDotsSeries(): void {
+  private drawDotsSeries(series: Series): void {
     this.svg
       .append('g')
-      .attr('fill', this.options.color)
+      .attr('fill', series.options.color)
       .selectAll('circle')
-      .data(this.data)
+      .data(series.points)
       .join('circle')
       .attr('cx', (d) => this.xScale(d.x))
       .attr('cy', (d) => this.yScale(d.y))
       .attr('r', 2);
   }
 
-  private drawLineSeries() {
+  private drawLineSeries(series: Series) {
     const line = d3
       .line<Point>()
       .defined((d) => !isNaN(d.y))
@@ -145,35 +153,44 @@ export class GraphComponent implements OnChanges {
 
     this.svg
       .append('path')
-      .datum(this.data.filter(line.defined()))
+      .datum(series.points.filter(line.defined()))
       .attr('stroke', '#ccc')
       .attr('stroke-width', 0.5)
       .attr('d', line);
 
     this.svg
       .append('path')
-      .datum(this.data)
-      .attr('stroke', this.options.color)
+      .datum(series.points)
+      .attr('stroke', series.options.color)
       .attr('stroke-width', 1.5)
       .attr('d', line);
   }
 
-  private addGapPoints(data: Point[]): Point[] {
+  private maybeAddGapPoints(serieses: Series[]): Series[] {
+    return serieses.map((series) =>
+      series.options.seriesType === 'line' &&
+      series.options.lineOptions.showGaps
+        ? { ...series, points: this.addGapPoints(series) }
+        : series
+    );
+  }
+
+  private addGapPoints(series: Series): Point[] {
     let previous: Point;
     const result = [];
-    for (let point of data) {
+    for (let point of series.points) {
       if (previous) {
         let xChange;
         let xChangeMax;
         let gapX;
         if (this.options.xType === 'number') {
           let numPoint = point as Point<number>;
-          const gapDistance = this.options.lineOptions.gapDistance;
+          const gapDistance = series.options.lineOptions.gapDistance;
           xChange = numPoint.x - (previous as Point<number>).x;
           xChangeMax = gapDistance;
           gapX = numPoint.x - 0.5 * gapDistance;
         } else if (this.options.xType === 'date') {
-          const gapDistanceDays = this.options.lineOptions.gapDistance * DAY_MS;
+          const gapDistanceDays = series.options.lineOptions.gapDistance * DAY_MS;
           xChange = dateDifference(point.x, previous.x);
           xChangeMax = gapDistanceDays;
           gapX = addMilliseconds(point.x, -0.5 * gapDistanceDays);
@@ -196,12 +213,12 @@ export class GraphComponent implements OnChanges {
   private getOptions(options: GraphOptions): GraphOptions {
     const defaultOptions: DeepRequired<GraphOptions> = {
       xType: undefined,
-      seriesType: undefined,
-      lineOptions: {
-        showGaps: true,
-        gapDistance: 2,
-      },
-      color: 'steelblue'
+      // seriesType: undefined,
+      // lineOptions: {
+      //   showGaps: true,
+      //   gapDistance: 2,
+      // },
+      // color: 'steelblue',
     };
     mergeDeep(defaultOptions, options);
     return defaultOptions;

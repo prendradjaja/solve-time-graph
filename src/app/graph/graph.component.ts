@@ -2,6 +2,7 @@ import { Component, ElementRef, OnInit, Input, OnChanges } from '@angular/core';
 import * as d3 from 'd3';
 import { DeepRequired, UnreachableCaseError } from 'ts-essentials';
 import { mergeDeep } from '../util';
+import { SolveData } from '../solves-data-resolver.service';
 
 export interface Series {
   points: Point[];
@@ -11,6 +12,7 @@ export interface Series {
 export interface Point<T = Date | number> {
   x: T; // TODO how to properly handle this with typescript?
   y: number;
+  data?: any;
 }
 
 export interface GraphOptions {
@@ -125,6 +127,75 @@ export class GraphComponent implements OnChanges {
         this.drawDotsSeries(series);
       } else {
         throw new UnreachableCaseError(series.options.seriesType);
+      }
+    }
+
+    const path = this.svg.append("g")
+      .attr("fill", "none")
+      .attr("stroke", "steelblue")
+      .attr("stroke-width", 1.5)
+      .attr("stroke-linejoin", "round")
+      .attr("stroke-linecap", "round")
+      // .selectAll("path")
+      // .data(data.series)
+      // .join("path")
+      // .style("mix-blend-mode", "multiply")
+      // .attr("d", d => line(d.values));
+
+
+    this.svg.call(hover, path);
+
+    const self = this;
+
+    function hover(svg, path) {
+
+      if ("ontouchstart" in document) svg
+        .style("-webkit-tap-highlight-color", "transparent")
+        .on("touchmove", moved)
+        .on("touchstart", entered)
+        .on("touchend", left)
+      else svg
+        .on("mousemove", moved)
+        .on("mouseenter", entered)
+        .on("mouseleave", left);
+
+      // const dot = svg.append("g")
+      //   .attr("display", "none");
+      //
+      // dot.append("circle")
+      //   .attr("r", 2.5);
+      //
+      // dot.append("text")
+      //   .attr("font-family", "sans-serif")
+      //   .attr("font-size", 10)
+      //   .attr("text-anchor", "middle")
+      //   .attr("y", -8);
+
+      function moved() {
+        d3.event.preventDefault();
+        const mouse = d3.mouse(this);
+        const xm = Math.round(self.xScale.invert(mouse[0]) as number);
+        const solveData: SolveData = self.serieses[0].points[xm]?.data;
+        if (solveData){
+          document.getElementById('solveinfo').innerHTML = (`Solve ${xm}: ${solveData.time} on ${solveData.date.toDateString()}`)
+        }
+        // const i1 = d3.bisectLeft(data.dates, xm, 1);
+        // const i0 = i1 - 1;
+        // const i = xm - data.dates[i0] > data.dates[i1] - xm ? i1 : i0;
+        // const s = d3.least(data.series, d => Math.abs(d.values[i] - ym));
+        // path.attr("stroke", d => d === s ? null : "#ddd").filter(d => d === s).raise();
+        // dot.attr("transform", `translate(${x(data.dates[i])},${y(s.values[i])})`);
+        // dot.select("text").text(s.name);
+      }
+
+      function entered() {
+        // path.style("mix-blend-mode", null).attr("stroke", "#ddd");
+        // dot.attr("display", null);
+      }
+
+      function left() {
+        // path.style("mix-blend-mode", "multiply").attr("stroke", null);
+        // dot.attr("display", "none");
       }
     }
 

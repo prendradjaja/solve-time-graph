@@ -51,6 +51,7 @@ export class HomePageComponent implements OnInit {
     this.graphData.solves = this.solves.map((solve, i) => ({
       x: i,
       y: solve.time,
+      data: solve
     }));
     this.graphData.ao50 = this.getMovingAverage(this.solves, 50, 3, 'number');
     this.graphData.ao100 = this.getMovingAverage(this.solves, 100, 5, 'number');

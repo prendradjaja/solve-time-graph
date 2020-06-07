@@ -57,8 +57,8 @@ export class GraphComponent implements OnChanges {
   options?: GraphOptions;
 
   margin = { top: 20, right: 30, bottom: 30, left: 40 };
-  height = 400;
-  width = 600;
+  height = 800;
+  width = 1400;
   xScale: d3.ScaleTime<number, number> | d3.ScaleLinear<number, number>;
   yScale: d3.ScaleLinear<number, number>;
   svg: d3.Selection<SVGSVGElement, undefined, null, undefined>;
@@ -285,7 +285,7 @@ export class GraphComponent implements OnChanges {
 
   private getXExtent() {
     const allPoints: Point[] = this.serieses.flatMap((series) => series.points);
-    return d3.extent(allPoints, (d) => d.x);
+    return [0, d3.max(allPoints, (d) => d.x)];
   }
 
   private getYExtent() {

@@ -51,6 +51,7 @@ export class HomePageComponent implements OnInit {
     this.graphData.solves = this.solves.map((solve, i) => ({
       x: i,
       y: solve.time,
+      data: solve
     }));
     this.graphData.ao50 = this.getMovingAverage(this.solves, 50, 3, 'number');
     this.graphData.ao100 = this.getMovingAverage(this.solves, 100, 5, 'number');
@@ -109,9 +110,10 @@ export class HomePageComponent implements OnInit {
         let items = solves
           .slice(start, end)
           .map((solve) => (!solve.isDNF ? solve.time : Infinity));
+        const unsorted = items.slice();
         items.sort();
-        items = items.slice(trimEachSide, -trimEachSide);
-        let average = sum(items) / items.length;
+        const trimmed = items.slice(trimEachSide, -trimEachSide);
+        let average = sum(trimmed) / trimmed.length;
         average = Number.isFinite(average) ? average : undefined;
         let x;
         if (by === 'number') {
@@ -124,6 +126,7 @@ export class HomePageComponent implements OnInit {
         result.push({
           x,
           y: average,
+          data: unsorted
         });
       }
     });
@@ -165,7 +168,7 @@ export class HomePageComponent implements OnInit {
     let remainder = solves;
     let removedCount: number;
 
-    const cutoffs = [50, 40, 30, 20];
+    const cutoffs = [50, 40, 30, 25, 20];
     const counts: { name: string; count: number }[] = [];
 
     ({ remainder, removedCount } = this.filterOutAndCount<SolveData>(
@@ -223,8 +226,8 @@ export class HomePageComponent implements OnInit {
         date,
         '\t',
         time,
-        '\t'
-        // point.x
+        '\t',
+        point && point.data
       );
     });
     console.groupEnd();
